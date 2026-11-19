@@ -92,6 +92,7 @@ class SMPAgent(ppo_agent.PPOAgent):
             ("enable_tar_obs", self._env._enable_tar_obs, False),
             ("num_disc_obs_steps", self._env._num_disc_obs_steps, None),
             ("disc_dof_vel_obs", self._env._disc_dof_vel_obs, False),
+            ("disc_joint_dof_obs", self._env._disc_joint_dof_obs, False),
         ]
 
         for key, env_val, default_val in env_checks:

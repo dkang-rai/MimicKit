@@ -14,17 +14,17 @@ model_ema_decay: 0.995
 model_ema_steps: 10
 model_ema_update_after: 5_000
 
-normalizer_std_clip: 0.2
+normalizer_std_clip: null
 
 batch_size: 512
-lr: 0.0001
-num_iterations: 200_000
+lr: 0.0002
+num_iterations: 800_000
 num_samples_stat: 20_000
 output_iter: 2_000
 grad_clip_norm: 1.0
 
 env_config: "data/envs/smp_g1_humble_env.yaml"
 motion_file: "data/datasets/dataset_g1_humble_locomotion.yaml"
-control_freq: 30
+control_freq: 50
 
 master_port: '11435'

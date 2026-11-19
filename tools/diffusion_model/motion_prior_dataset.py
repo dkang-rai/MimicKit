@@ -29,6 +29,7 @@ class MotionPriorData:
         self.control_freq = config["control_freq"]
         self._timestep = 1.0 / self.control_freq
         self._disc_dof_vel_obs = env_config.get("disc_dof_vel_obs", False)
+        self._disc_joint_dof_obs = env_config.get("disc_joint_dof_obs", False)
 
         self._build_envs(config)
 
@@ -126,13 +127,20 @@ class MotionPriorData:
                                   root_vel=root_vel,
                                   root_ang_vel=root_ang_vel,
                                   joint_rot=joint_rot,
+                                  joint_dof=self._compute_joint_dof(joint_rot),
                                   dof_vel=dof_vel,
                                   key_pos=key_pos,
                                   global_obs=self._global_obs,
                                   root_height_obs=self._root_height_obs,
-                                  dof_vel_obs=self._disc_dof_vel_obs)
+                                  dof_vel_obs=self._disc_dof_vel_obs,
+                                  joint_dof_obs=self._disc_joint_dof_obs)
         
         return smp_obs
+
+    def _compute_joint_dof(self, joint_rot):
+        if (self._disc_joint_dof_obs):
+            return self._kin_char_model.rot_to_dof(joint_rot)
+        return torch.zeros([0], device=joint_rot.device, dtype=joint_rot.dtype)
 
     def _fetch_smp_demo_data(self, motion_ids, motion_times0):
         num_samples = motion_ids.shape[0]
@@ -208,13 +216,16 @@ class MotionPriorData:
         root_pos_obs = sample[..., 0: 3]
         root_rot_obs = sample[..., 3: 9]
         joint_rot_obs = sample[..., 9: 9 + num_joints * 6]
+        dof_size = self._motion_lib._kin_char_model.get_dof_size()
 
         root_pos = root_pos_obs
         root_rot = torch_util.tan_norm_to_quat(root_rot_obs)
         root_rot = torch_util.quat_to_exp_map(root_rot)
-        joint_rot = torch_util.tan_norm_to_quat(joint_rot_obs.reshape(list(joint_rot_obs.shape[: 1]) + [num_joints, 6]))
-
-        joint_dof = self._motion_lib._kin_char_model.rot_to_dof(joint_rot)
+        if (self._disc_joint_dof_obs):
+            joint_dof = sample[..., 9: 9 + dof_size]
+        else:
+            joint_rot = torch_util.tan_norm_to_quat(joint_rot_obs.reshape(list(joint_rot_obs.shape[: 1]) + [num_joints, 6]))
+            joint_dof = self._motion_lib._kin_char_model.rot_to_dof(joint_rot)
 
         data_frames[:, 0: 3] = root_pos
         data_frames[:, 3: 6] = root_rot

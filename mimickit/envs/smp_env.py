@@ -83,12 +83,16 @@ class SMPEnv(amp_env.AMPEnv):
         root_pos_obs = sample[..., 0:3]
         root_rot_obs = sample[..., 3:9]
         joint_rot_obs = sample[..., 9:9 + num_rots * 6]
+        dof_size = kin_char_model.get_dof_size()
 
         root_rot = torch_util.tan_norm_to_quat(root_rot_obs.reshape(-1, 6))
         root_rot = torch_util.quat_to_exp_map(root_rot)
         root_rot = root_rot.reshape(list(root_rot_obs.shape[:-1]) + [3])
-        joint_rot = torch_util.tan_norm_to_quat(joint_rot_obs.reshape(list(joint_rot_obs.shape[:-1]) + [num_rots, 6]))
-        joint_dof = kin_char_model.rot_to_dof(joint_rot)
+        if (self._disc_joint_dof_obs):
+            joint_dof = sample[..., 9:9 + dof_size]
+        else:
+            joint_rot = torch_util.tan_norm_to_quat(joint_rot_obs.reshape(list(joint_rot_obs.shape[:-1]) + [num_rots, 6]))
+            joint_dof = kin_char_model.rot_to_dof(joint_rot)
 
         data_frames[..., 0:3] = root_pos_obs
         data_frames[..., 3:6] = root_rot

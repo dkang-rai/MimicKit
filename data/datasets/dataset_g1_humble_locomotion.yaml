@@ -60,9 +60,9 @@ motions:
   - file: "data/motions/g1_humble/S1_slow_walk_1_mirrored.pkl"
     weight: 1.0
   - file: "data/motions/g1_humble/S3_fast_walk_0.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S3_fast_walk_0_mirrored.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S3_normal_walk_0.pkl"
     weight: 1.0
   - file: "data/motions/g1_humble/S3_normal_walk_0_mirrored.pkl"
@@ -96,21 +96,21 @@ motions:
   - file: "data/motions/g1_humble/S4_slow_walk_1_mirrored.pkl"
     weight: 1.0
   - file: "data/motions/g1_humble/S5_fast_walk_0.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S5_fast_walk_0_mirrored.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S5_normal_walk_0.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S5_normal_walk_0_mirrored.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S5_slow_walk_0.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S5_slow_walk_0_mirrored.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S6_fast_walk.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S6_fast_walk_mirrored.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S6_normal_walk.pkl"
     weight: 1.0
   - file: "data/motions/g1_humble/S6_normal_walk_mirrored.pkl"
@@ -120,21 +120,21 @@ motions:
   - file: "data/motions/g1_humble/S6_slow_walk_mirrored.pkl"
     weight: 1.0
   - file: "data/motions/g1_humble/S7_fast_walk_0.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S7_fast_walk_0_mirrored.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S7_normal_walk_0.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S7_normal_walk_0_mirrored.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S7_slow_walk_0.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S7_slow_walk_0_mirrored.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S8_fast_walk.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S8_fast_walk_mirrored.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/S8_normal_walk.pkl"
     weight: 1.0
   - file: "data/motions/g1_humble/S8_normal_walk_mirrored.pkl"
@@ -156,13 +156,13 @@ motions:
   - file: "data/motions/g1_humble/S9_slow_walk_0_mirrored.pkl"
     weight: 1.0
   - file: "data/motions/g1_humble/fast_sidestep.pkl"
-    weight: 1.0
+    weight: 3.0
   - file: "data/motions/g1_humble/fast_sidestep_mirrored.pkl"
-    weight: 1.0
+    weight: 3.0
   - file: "data/motions/g1_humble/normal_sidestep.pkl"
-    weight: 1.0
+    weight: 3.0
   - file: "data/motions/g1_humble/normal_sidestep_mirrored.pkl"
-    weight: 1.0
+    weight: 3.0
   - file: "data/motions/g1_humble/shuffle_start.pkl"
     weight: 1.0
   - file: "data/motions/g1_humble/shuffle_start_mirrored.pkl"
@@ -172,13 +172,13 @@ motions:
   - file: "data/motions/g1_humble/shuffle_turn_in_place_mirrored.pkl"
     weight: 1.0
   - file: "data/motions/g1_humble/slow_sidestep.pkl"
-    weight: 1.0
+    weight: 3.0
   - file: "data/motions/g1_humble/slow_sidestep_mirrored.pkl"
-    weight: 1.0
+    weight: 3.0
   - file: "data/motions/g1_humble/u4_fast_walk.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/u4_fast_walk_mirrored.pkl"
-    weight: 1.0
+    weight: 2.0
   - file: "data/motions/g1_humble/u4_normal_walk.pkl"
     weight: 1.0
   - file: "data/motions/g1_humble/u4_normal_walk_mirrored.pkl"

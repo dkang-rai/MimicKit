@@ -10,6 +10,7 @@ class AMPEnv(deepmimic_env.DeepMimicEnv):
     def __init__(self, env_config, engine_config, num_envs, device, visualize, record_video=False):
         self._num_disc_obs_steps = env_config["num_disc_obs_steps"]
         self._disc_dof_vel_obs = env_config.get("disc_dof_vel_obs", True)
+        self._disc_joint_dof_obs = env_config.get("disc_joint_dof_obs", False)
         super().__init__(env_config=env_config, engine_config=engine_config, num_envs=num_envs, device=device,
                          visualize=visualize, record_video=record_video)
         return
@@ -25,6 +26,11 @@ class AMPEnv(deepmimic_env.DeepMimicEnv):
             dtype=disc_obs_dtype,
         )
         return disc_obs_space
+
+    def _compute_disc_joint_dof(self, joint_rot):
+        if (self._disc_joint_dof_obs):
+            return self._kin_char_model.rot_to_dof(joint_rot)
+        return torch.zeros([0], device=joint_rot.device, dtype=joint_rot.dtype)
 
     def get_num_disc_obs_steps(self):
         return self._num_disc_obs_steps
@@ -57,11 +63,13 @@ class AMPEnv(deepmimic_env.DeepMimicEnv):
                                   root_vel=root_vel,
                                   root_ang_vel=root_ang_vel,
                                   joint_rot=joint_rot,
+                                  joint_dof=self._compute_disc_joint_dof(joint_rot),
                                   dof_vel=dof_vel,
                                   key_pos=key_pos,
                                   global_obs=self._global_obs,
                                   root_height_obs=self._root_height_obs,
-                                  dof_vel_obs=self._disc_dof_vel_obs)
+                                  dof_vel_obs=self._disc_dof_vel_obs,
+                                  joint_dof_obs=self._disc_joint_dof_obs)
         return disc_obs
 
     def _fetch_disc_demo_data(self, motion_ids, motion_times0):
@@ -233,11 +241,13 @@ class AMPEnv(deepmimic_env.DeepMimicEnv):
                                   root_vel=root_vel,
                                   root_ang_vel=root_ang_vel,
                                   joint_rot=joint_rot,
+                                  joint_dof=self._compute_disc_joint_dof(joint_rot),
                                   dof_vel=dof_vel,
                                   key_pos=key_pos,
                                   global_obs=self._global_obs,
                                   root_height_obs=self._root_height_obs,
-                                  dof_vel_obs=self._disc_dof_vel_obs)
+                                  dof_vel_obs=self._disc_dof_vel_obs,
+                                  joint_dof_obs=self._disc_joint_dof_obs)
 
         if (env_ids is None):
             self._disc_obs_buf[:] = disc_obs
@@ -334,8 +344,12 @@ def compute_disc_vel_obs(ref_root_rot, root_vel, root_ang_vel, dof_vel, global_o
     return obs
 
 @torch.jit.script
-def compute_disc_obs(ref_root_pos, ref_root_rot, root_pos, root_rot, root_vel, root_ang_vel, joint_rot, dof_vel, key_pos, global_obs, root_height_obs, dof_vel_obs):
-    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, bool, bool, bool) -> Tensor
+def compute_disc_obs(ref_root_pos, ref_root_rot, root_pos, root_rot, root_vel, root_ang_vel, joint_rot, joint_dof, dof_vel, key_pos, global_obs, root_height_obs, dof_vel_obs, joint_dof_obs):
+    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, bool, bool, bool, bool) -> Tensor
+
+    if (joint_dof_obs):
+        # swap the per-joint 6D rotations for raw joint angles
+        joint_rot = joint_rot[..., :0, :]
 
     pos_obs = deepmimic_env.compute_tar_obs(ref_root_pos=ref_root_pos, 
                                                ref_root_rot=ref_root_rot, 
@@ -345,6 +359,10 @@ def compute_disc_obs(ref_root_pos, ref_root_rot, root_pos, root_rot, root_vel, r
                                                key_pos=key_pos,
                                                global_obs=global_obs, 
                                                root_height_obs=root_height_obs)
+
+    if (joint_dof_obs):
+        num_root_obs = 9 if root_height_obs else 8
+        pos_obs = torch.cat([pos_obs[..., :num_root_obs], joint_dof, pos_obs[..., num_root_obs:]], dim=-1)
 
     vel_obs = compute_disc_vel_obs(ref_root_rot=ref_root_rot, 
                                   root_vel=root_vel, 
