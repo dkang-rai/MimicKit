@@ -12,7 +12,7 @@ enable_tar_obs: False
 disc_dof_vel_obs: False
 disc_joint_dof_obs: True
 joint_dof_obs: True # policy observes raw joint angles instead of 6D joint rotations
-num_disc_obs_steps: 10
+num_disc_obs_steps: 20
 rand_reset: True
 zero_center_action: True
 

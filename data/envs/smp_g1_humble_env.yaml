@@ -11,7 +11,7 @@ enable_phase_obs: False
 enable_tar_obs: False
 disc_dof_vel_obs: False
 disc_joint_dof_obs: True
-num_disc_obs_steps: 10
+num_disc_obs_steps: 20
 rand_reset: True
 zero_center_action: True
 
