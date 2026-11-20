@@ -12,7 +12,7 @@ import yaml
 
 import anim.motion as motion
 from learning.tinymdm.tinymdm_model import TinyMDMModel
-from motion_prior_dataset import MotionPriorData
+from velocity_balanced_dataset import build_dataset
 import util.logger as logger
 
 def fixseed(seed):
@@ -69,7 +69,7 @@ def test(cfg_path, model_file, out_dir=None, num_samples=16, device="cuda"):
     os.makedirs(out_dir, exist_ok=True)
     os.makedirs(out_motion_dir, exist_ok=True)
 
-    dataset_env = MotionPriorData(config, device)
+    dataset_env = build_dataset(config, device)
     obs_space = dataset_env.get_obs_space()
     num_obs_steps = env_config["num_disc_obs_steps"]
     config["input_dim"] = obs_space.shape[-1]
@@ -117,7 +117,7 @@ def train(cfg_path, out_dir=None, device="cuda"):
     output_iter = config.get("output_iter", 2_000)
     grad_clip_norm = config.get("grad_clip_norm", 1.0)
 
-    dataset_env = MotionPriorData(config, device)
+    dataset_env = build_dataset(config, device)
     obs_space = dataset_env.get_obs_space()
     num_obs_steps = env_config["num_disc_obs_steps"]
     
@@ -125,7 +125,7 @@ def train(cfg_path, out_dir=None, device="cuda"):
     config["input_channel"] = int(config["input_dim"] / num_obs_steps)
     print(f"Input_channel: {config['input_channel']}")
 
-    samples = dataset_env.fetch_obs_demo(num_samples_stat)
+    samples = dataset_env.fetch_stat_obs(num_samples_stat)
     model = TinyMDMModel(config, device)
     model.update_normalizer(samples)
     optimizer = optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()), lr=config['lr'])

@@ -29,6 +29,7 @@ class TinyMDMModel(KinematicBaseModel):
         self.dropout = config.get("dropout", 0.)
         self.estimate_mode = config["estimate_mode"]
         self.loss_type = config["loss_type"]
+        self.num_noise_samples = config.get("num_noise_samples", 1)
         self.schedule_mode = config["noise_schedule_mode"]
         self.arch_name = config["arch_name"]
         self.model_ema = config.get("model_ema", False)
@@ -143,8 +144,10 @@ class TinyMDMModel(KinematicBaseModel):
         return x_0
 
     def forward(self, x, timesteps=None, **kwargs):
-        bsz = x.shape[0]
         device = x.device
+        if timesteps is None and self.num_noise_samples > 1:
+            x = x.repeat_interleave(self.num_noise_samples, dim=0)
+        bsz = x.shape[0]
         if timesteps is None:
             timesteps = torch.randint(0, len(self.diffusion_scheduler.timesteps), (bsz,), device=device)
         noise = torch.randn_like(x)

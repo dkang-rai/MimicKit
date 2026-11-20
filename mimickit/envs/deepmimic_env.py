@@ -402,7 +402,9 @@ class DeepMimicEnv(char_env.CharEnv):
                                     tar_root_pos=tar_root_pos,
                                     tar_root_rot=tar_root_rot,
                                     tar_joint_rot=tar_joint_rot,
-                                    tar_key_pos=tar_key_pos)
+                                    tar_key_pos=tar_key_pos,
+                                    joint_dof=dof_pos,
+                                    joint_dof_obs=self._joint_dof_obs)
         return obs
     
     def _update_reward(self):
@@ -679,8 +681,9 @@ def compute_tar_obs(ref_root_pos, ref_root_rot, root_pos, root_rot, joint_rot, k
 @torch.jit.script
 def compute_deepmimic_obs(root_pos, root_rot, root_vel, root_ang_vel, joint_rot, dof_vel, key_pos, global_obs, root_height_obs, 
                           phase, num_phase_encoding, enable_phase_obs, 
-                          enable_tar_obs, tar_root_pos, tar_root_rot, tar_joint_rot, tar_key_pos):
-    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, bool, bool, Tensor, int, bool, bool, Tensor, Tensor, Tensor, Tensor) -> Tensor
+                          enable_tar_obs, tar_root_pos, tar_root_rot, tar_joint_rot, tar_key_pos,
+                          joint_dof, joint_dof_obs):
+    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, bool, bool, Tensor, int, bool, bool, Tensor, Tensor, Tensor, Tensor, Tensor, bool) -> Tensor
     char_obs = char_env.compute_char_obs(root_pos=root_pos,
                                             root_rot=root_rot,
                                             root_vel=root_vel,
@@ -689,7 +692,9 @@ def compute_deepmimic_obs(root_pos, root_rot, root_vel, root_ang_vel, joint_rot,
                                             dof_vel=dof_vel,
                                             key_pos=key_pos,
                                             global_obs=global_obs,
-                                            root_height_obs=root_height_obs)
+                                            root_height_obs=root_height_obs,
+                                            joint_dof=joint_dof,
+                                            joint_dof_obs=joint_dof_obs)
     obs = [char_obs]
 
     if (enable_phase_obs):

@@ -92,6 +92,9 @@ class MotionPriorData:
 
         return
     
+    def fetch_stat_obs(self, num_samples):
+        return self.fetch_obs_demo(num_samples)
+
     def fetch_obs_demo(self, num_samples, return_class=False):
         obs = self.fetch_smp_obs_demo(num_samples, return_id=return_class)
         return obs

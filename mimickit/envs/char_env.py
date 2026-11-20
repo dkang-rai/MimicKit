@@ -18,6 +18,7 @@ class CharEnv(sim_env.SimEnv):
     def __init__(self, env_config, engine_config, num_envs, device, visualize, record_video=False):
         self._global_obs = env_config["global_obs"]
         self._root_height_obs = env_config.get("root_height_obs", True)
+        self._joint_dof_obs = env_config.get("joint_dof_obs", False)
         self._zero_center_action = env_config.get("zero_center_action", False)
         
         super().__init__(env_config=env_config, engine_config=engine_config,
@@ -285,7 +286,9 @@ class CharEnv(sim_env.SimEnv):
                                dof_vel=dof_vel,
                                key_pos=key_pos,
                                global_obs=self._global_obs,
-                               root_height_obs=self._root_height_obs)
+                               root_height_obs=self._root_height_obs,
+                               joint_dof=dof_pos,
+                               joint_dof_obs=self._joint_dof_obs)
         return obs
     
     def _reset_envs(self, env_ids):
@@ -409,8 +412,9 @@ def convert_to_local_root_body_pos(root_rot, body_pos):
     return local_body_pos
 
 @torch.jit.script
-def compute_char_obs(root_pos, root_rot, root_vel, root_ang_vel, joint_rot, dof_vel, key_pos, global_obs, root_height_obs):
-    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, bool, bool) -> Tensor
+def compute_char_obs(root_pos, root_rot, root_vel, root_ang_vel, joint_rot, dof_vel, key_pos, global_obs, root_height_obs,
+                     joint_dof, joint_dof_obs):
+    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, bool, bool, Tensor, bool) -> Tensor
     heading_rot = torch_util.calc_heading_quat_inv(root_rot)
     
     if (global_obs):
@@ -423,9 +427,12 @@ def compute_char_obs(root_pos, root_rot, root_vel, root_ang_vel, joint_rot, dof_
         root_vel_obs = torch_util.quat_rotate(heading_rot, root_vel)
         root_ang_vel_obs = torch_util.quat_rotate(heading_rot, root_ang_vel)
 
-    joint_rot_flat = torch.reshape(joint_rot, [joint_rot.shape[0] * joint_rot.shape[1], joint_rot.shape[2]])
-    joint_rot_obs_flat = torch_util.quat_to_tan_norm(joint_rot_flat)
-    joint_rot_obs = torch.reshape(joint_rot_obs_flat, [joint_rot.shape[0], joint_rot.shape[1] * joint_rot_obs_flat.shape[-1]])
+    if (joint_dof_obs):
+        joint_rot_obs = joint_dof
+    else:
+        joint_rot_flat = torch.reshape(joint_rot, [joint_rot.shape[0] * joint_rot.shape[1], joint_rot.shape[2]])
+        joint_rot_obs_flat = torch_util.quat_to_tan_norm(joint_rot_flat)
+        joint_rot_obs = torch.reshape(joint_rot_obs_flat, [joint_rot.shape[0], joint_rot.shape[1] * joint_rot_obs_flat.shape[-1]])
 
     obs = [root_rot_obs, root_vel_obs, root_ang_vel_obs, joint_rot_obs, dof_vel]
 
