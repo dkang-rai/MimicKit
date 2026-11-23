@@ -17,6 +17,8 @@ class TaskVelocityEnv(smp_env.SMPEnv):
         self._tar_yaw_rate_max = env_config["tar_yaw_rate_max"]
         self._tar_change_time_min = env_config["tar_change_time_min"]
         self._tar_change_time_max = env_config["tar_change_time_max"]
+        # commands with planar speed below this (m/s) are resampled; 0 disables
+        self._tar_speed_min = env_config.get("tar_speed_min", 0.0)
 
         self._reward_cmd_vel_w = float(env_config["reward_cmd_vel_w"])
         self._reward_cmd_yaw_w = float(env_config["reward_cmd_yaw_w"])
@@ -145,11 +147,23 @@ class TaskVelocityEnv(smp_env.SMPEnv):
             self._update_marker(env_ids)
         return
 
+    def _sample_tar_vel(self, n, max_rounds=100):
+        vx = (self._tar_vx_max - self._tar_vx_min) * torch.rand(n, device=self._device) + self._tar_vx_min
+        vy = (self._tar_vy_max - self._tar_vy_min) * torch.rand(n, device=self._device) + self._tar_vy_min
+        if (self._tar_speed_min > 0):
+            for _ in range(max_rounds):
+                slow = torch.sqrt(vx * vx + vy * vy) < self._tar_speed_min
+                num_slow = int(slow.sum().item())
+                if (num_slow == 0):
+                    break
+                vx[slow] = (self._tar_vx_max - self._tar_vx_min) * torch.rand(num_slow, device=self._device) + self._tar_vx_min
+                vy[slow] = (self._tar_vy_max - self._tar_vy_min) * torch.rand(num_slow, device=self._device) + self._tar_vy_min
+        return vx, vy
+
     def _reset_tar(self, env_ids):
         n = env_ids.shape[0]
 
-        vx = (self._tar_vx_max - self._tar_vx_min) * torch.rand(n, device=self._device) + self._tar_vx_min
-        vy = (self._tar_vy_max - self._tar_vy_min) * torch.rand(n, device=self._device) + self._tar_vy_min
+        vx, vy = self._sample_tar_vel(n)
         yaw_rate = (self._tar_yaw_rate_max - self._tar_yaw_rate_min) * torch.rand(n, device=self._device) + self._tar_yaw_rate_min
 
         self._tar_vel[env_ids] = torch.stack([vx, vy], dim=-1)

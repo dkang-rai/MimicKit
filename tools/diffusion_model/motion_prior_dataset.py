@@ -30,6 +30,11 @@ class MotionPriorData:
         self._timestep = 1.0 / self.control_freq
         self._disc_dof_vel_obs = env_config.get("disc_dof_vel_obs", False)
         self._disc_joint_dof_obs = env_config.get("disc_joint_dof_obs", False)
+        # sample window end times from [window span, clip length] so no window reaches before
+        # the clip start, where MotionLib clamps to the first frame (frozen-pose padding)
+        self._skip_clamped_windows = config.get("skip_clamped_windows", False)
+        # windows whose mean horizontal root speed is below this (m/s) are rejected; 0 disables
+        self._min_window_speed = config.get("min_window_speed", 0.0)
 
         self._build_envs(config)
 
@@ -102,10 +107,39 @@ class MotionPriorData:
 
     @torch.no_grad()
     def fetch_smp_obs_demo(self, num_samples, return_id=False):
-        motion_ids = self._motion_lib.sample_motions(num_samples)
-        motion_times0 = self._motion_lib.sample_time(motion_ids)
+        motion_ids, motion_times0 = self._sample_window_starts(num_samples)
+        if (self._min_window_speed > 0):
+            motion_ids, motion_times0 = self._reject_slow_windows(motion_ids, motion_times0)
         smp_obs = self._compute_smp_obs_demo(motion_ids, motion_times0)
         return smp_obs
+
+    def _sample_window_starts(self, num_samples):
+        motion_ids = self._motion_lib.sample_motions(num_samples)
+        if (self._skip_clamped_windows):
+            span = self._timestep * (self._num_disc_obs_steps - 1)
+            motion_times0 = span + self._motion_lib.sample_time(motion_ids, truncate_time=span)
+        else:
+            motion_times0 = self._motion_lib.sample_time(motion_ids)
+        return motion_ids, motion_times0
+
+    def _calc_window_speed(self, motion_ids, motion_times0):
+        _, _, root_vel, _, _, _, _ = self._fetch_smp_demo_data(motion_ids, motion_times0)
+        return torch.norm(root_vel[..., :2], dim=-1).mean(dim=-1)
+
+    def _reject_slow_windows(self, motion_ids, motion_times0, max_rounds=100):
+        # resample rejected windows until all pass, so the batch size is unchanged
+        slow = self._calc_window_speed(motion_ids, motion_times0) < self._min_window_speed
+        for _ in range(max_rounds):
+            num_slow = int(slow.sum().item())
+            if (num_slow == 0):
+                break
+            new_ids, new_times = self._sample_window_starts(num_slow)
+            motion_ids[slow] = new_ids
+            motion_times0[slow] = new_times
+            idx = slow.nonzero(as_tuple=True)[0]
+            slow[idx] = self._calc_window_speed(new_ids, new_times) < self._min_window_speed
+        assert not slow.any(), "min_window_speed rejects almost every window"
+        return motion_ids, motion_times0
     
     def _compute_smp_obs_demo(self, motion_ids, motion_times0):
         root_pos, root_rot, root_vel, root_ang_vel, joint_rot, dof_vel, body_pos = self._fetch_smp_demo_data(motion_ids, motion_times0)
