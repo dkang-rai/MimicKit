@@ -32,7 +32,6 @@ tar_yaw_rate_min: -1.0 # rad/s, turning while walking (prior data covers |yaw ra
 tar_yaw_rate_max: 1.0
 tar_change_time_min: 4.0
 tar_change_time_max: 7.0
-tar_speed_min: 0.3 # m/s, matches the prior min_window_speed
 
 motion_file: "data/datasets/humble/dataset_g1_humble_multi_clip.yaml"
 
