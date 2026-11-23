@@ -44,8 +44,8 @@ sds_normalizer_samples: 100_000_000
 
 enable_gsi: True
 
-task_reward_weight: 0.5
-smp_reward_weight: 0.5
+task_reward_weight: 0.2
+smp_reward_weight: 0.8
 
-smp_prior_cfg: "output/smp_prior_g1_humble/diffusion_config.yaml"
-smp_prior_model: "output/smp_prior_g1_humble/model.pt"
+smp_prior_cfg: "output/smp_prior_g1_humble_fast_normal_sidestep/diffusion_config.yaml"
+smp_prior_model: "output/smp_prior_g1_humble_fast_normal_sidestep/model.pt"

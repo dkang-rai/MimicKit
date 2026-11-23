@@ -28,13 +28,13 @@ tar_vx_min: 0.0 # m/s
 tar_vx_max: 1.7 # m/s
 tar_vy_min: -0.8 # m/s, sidestep range
 tar_vy_max: 0.8
-tar_yaw_rate_min: 0.0 # rad/s
-tar_yaw_rate_max: 0.0
+tar_yaw_rate_min: -1.0 # rad/s, turning while walking (prior data covers |yaw rate| up to ~1.5 at p90)
+tar_yaw_rate_max: 1.0
 tar_change_time_min: 4.0
 tar_change_time_max: 7.0
 tar_speed_min: 0.3 # m/s, matches the prior min_window_speed
 
-motion_file: "data/datasets/dataset_g1_humble_fast_normal_sidestep.yaml"
+motion_file: "data/datasets/humble/dataset_g1_humble_multi_clip.yaml"
 
 reward_cmd_vel_w: 0.7
 reward_cmd_yaw_w: 0.3

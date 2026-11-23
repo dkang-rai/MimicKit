@@ -24,8 +24,8 @@ key_bodies: ["left_ankle_roll_link", "right_ankle_roll_link", "head_marker_link"
 contact_bodies: ["left_knee_link", "left_ankle_pitch_link", "left_ankle_roll_link", "right_knee_link", "right_ankle_pitch_link", "right_ankle_roll_link"]
 
 # body-frame velocity and yaw rate commands
-tar_vx_min: 1.2 # m/s, steady fast-walk range of S0_fast_walk_0
-tar_vx_max: 1.7
+tar_vx_min: 0.5 # m/s
+tar_vx_max: 1.7 # m/s
 tar_vy_min: 0.0 # m/s
 tar_vy_max: 0.0
 tar_yaw_rate_min: 0.0 # rad/s
@@ -33,7 +33,7 @@ tar_yaw_rate_max: 0.0
 tar_change_time_min: 4.0
 tar_change_time_max: 7.0
 
-motion_file: "data/motions/g1_humble/S0_fast_walk_0.pkl"
+motion_file: "data/datasets/humble/dataset_g1_humble_single_clip.yaml" # full S0_fast_walk_0 (+ mirror)
 
 reward_cmd_vel_w: 0.7
 reward_cmd_yaw_w: 0.3
